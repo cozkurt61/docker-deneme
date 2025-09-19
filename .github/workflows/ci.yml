@@ -1,0 +1,39 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kodu checkout et
+        uses: actions/checkout@v3
+
+      - name: Backend bağımlılıklarını yükle
+        run: |
+          cd backend
+          npm install
+
+      - name: Frontend bağımlılıklarını yükle
+        run: |
+          cd frontend
+          npm install
+
+      - name: Backend test (varsa)
+        run: |
+          cd backend
+          if [ -f package.json ] && grep -q '"test"' package.json; then npm test; else echo "Test script yok"; fi
+
+      - name: Frontend test (varsa)
+        run: |
+          cd frontend
+          if [ -f package.json ] && grep -q '"test"' package.json; then npm test; else echo "Test script yok"; fi
+
+      - name: Docker image build (opsiyonel)
+        run: |
+          docker build -t my-backend ./backend
+          docker build -t my-frontend ./frontend
